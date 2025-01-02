@@ -4,18 +4,31 @@ import auth from '../../firebase.init';
 
 const Register = () => {
     const [errorMessage, setErrorMessage]=useState('');
+    const [success, setSuccess] = useState(false);
     const handleRegister = (event) =>{
         event.preventDefault();
         const email = event.target.email.value;
         const password = event.target.password.value;
         setErrorMessage('');
+        setSuccess(false);
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/;
+        if(password.length < 6){
+            setErrorMessage('Password must be in 6 character or longer.');
+            return;
+        }
+        if(!passwordRegex.test(password)){
+            setErrorMessage('Password must contain at least 1 lowercase letter, 1 uppercase letter, 1 number, and 1 special character.');
+            return;
+        }
         createUserWithEmailAndPassword(auth, email, password)
         .then(result => {
             console.log(result.user)
+            setSuccess(true)
         })
         .catch(error => {
             console.log('Error', error.message);
             setErrorMessage(error.message);
+            setSuccess(false);
         })
     }
     return (
@@ -51,6 +64,9 @@ const Register = () => {
                 <button className="btn  btn-accent btn-wide my-8 mx-auto block">Accent</button>
                 {
                     errorMessage && <p className='text-yellow-300 text-2xl font-semibold'>{errorMessage}</p>
+                }
+                {
+                    success && <p className='text-2xl font-semibold text-green-400'>successfully sign up</p>
                 }
             </form>
         </div>
