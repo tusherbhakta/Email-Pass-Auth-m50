@@ -1,17 +1,22 @@
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import React from 'react';
+import React, { useState } from 'react';
 import auth from '../../firebase.init';
 
 const Register = () => {
+    const [errorMessage, setErrorMessage]=useState('');
     const handleRegister = (event) =>{
         event.preventDefault();
         const email = event.target.email.value;
         const password = event.target.password.value;
+        setErrorMessage('');
         createUserWithEmailAndPassword(auth, email, password)
         .then(result => {
             console.log(result.user)
         })
-        .catch(error => console.log('Error', error))
+        .catch(error => {
+            console.log('Error', error.message);
+            setErrorMessage(error.message);
+        })
     }
     return (
         <div className='max-w-lg mx-auto'>
@@ -44,6 +49,9 @@ const Register = () => {
                     <input type="password" className="grow" name='password' placeholder='Password' />
                 </label>
                 <button className="btn  btn-accent btn-wide my-8 mx-auto block">Accent</button>
+                {
+                    errorMessage && <p className='text-yellow-300 text-2xl font-semibold'>{errorMessage}</p>
+                }
             </form>
         </div>
     );
