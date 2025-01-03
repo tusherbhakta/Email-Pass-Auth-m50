@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import React, { useState } from 'react';
 import auth from '../../firebase.init';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -13,9 +13,11 @@ const Register = () => {
         const email = event.target.email.value;
         const password = event.target.password.value;
         const terms = event.target.terms.checked;
+        const name = event.target.name.value;
+        const photo = event.target.photo.value;
         setErrorMessage('');
         setSuccess(false);
-        if(!terms){
+        if (!terms) {
             setErrorMessage('checked our terms and conditions');
             return;
         }
@@ -33,9 +35,19 @@ const Register = () => {
                 console.log(result.user)
                 setSuccess(true);
                 sendEmailVerification(auth.currentUser)
-                .then(()=>{
-                    
-                })
+                    .then(() => {
+                    });
+                    const profile = {
+                        displayName: name,
+                        photoURL: photo
+                    }
+                    updateProfile(auth.currentUser)
+                    .then(()=>{
+                        console.log('update profile successfully')
+                    })
+                    .catch(()=>{
+                        console.log('error to update profile')
+                    })
             })
             .catch(error => {
                 console.log('Error', error.message);
@@ -48,6 +60,12 @@ const Register = () => {
             <h2 className='text-4xl my-8'>Register</h2>
             <form className='' onSubmit={handleRegister}>
                 <div>
+                    <label className="input input-bordered flex items-center gap-2 my-8">
+                        <input type="text" name='name' className="grow" placeholder="Name" />
+                    </label>
+                    <label className="input input-bordered flex items-center gap-2 my-8">
+                        <input type="text" name='photo' className="grow" placeholder="URL" />
+                    </label>
                     <label className="input input-bordered flex items-center gap-2 my-8">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
