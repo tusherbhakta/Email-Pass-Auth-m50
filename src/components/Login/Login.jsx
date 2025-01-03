@@ -1,12 +1,13 @@
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import React, { useState } from 'react';
+import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
+import React, { useRef, useState } from 'react';
 import auth from '../../firebase.init';
 import { Link } from 'react-router-dom';
 
 const Login = () => {
     const [success, setSuccess] = useState(false);
     const [errorMessage, setErrorMessage] = useState('')
-    const handleLogin = (event) =>{
+    const emailRef = useRef();
+    const handleLogin = (event) => {
         event.preventDefault();
         const email = event.target.email.value;
         const password = event.target.password.value;
@@ -17,14 +18,32 @@ const Login = () => {
 
         // login user 
         signInWithEmailAndPassword(auth, email, password)
-        .then((result) =>{
-            console.log(result.user)
-            setSuccess(true);
-        })
-        .catch((error) =>{
-            console.log('Error',error.message)
-            setErrorMessage(error.message);
-        })
+            .then((result) => {
+                console.log(result.user)
+                if (!result.user.emailVerified) {
+                    setErrorMessage('please go to your email and verify your email')
+                }
+                else {
+                    setSuccess(true);
+                }
+            })
+            .catch((error) => {
+                console.log('Error', error.message)
+                setErrorMessage(error.message);
+            })
+    }
+    const handleForgetPass = () =>{
+        console.log('get the email address', emailRef.current.value);
+        const email = emailRef.current.value;
+        if(!email){
+            setErrorMessage('enter a vaild email address.');
+        }
+        else{
+            sendPasswordResetEmail(auth, email)
+            .then(()=>{
+                setErrorMessage('please check your email and reset your password')
+            })
+        }
     }
     return (
         <div className="hero bg-base-200 min-h-screen">
@@ -42,14 +61,14 @@ const Login = () => {
                             <label className="label">
                                 <span className="label-text">Email</span>
                             </label>
-                            <input type="email" name='email' placeholder="email" className="input input-bordered" required />
+                            <input type="email" ref={emailRef} name='email' placeholder="email" className="input input-bordered" required />
                         </div>
                         <div className="form-control">
                             <label className="label">
                                 <span className="label-text">Password</span>
                             </label>
                             <input type="password" name='password' placeholder="password" className="input input-bordered" required />
-                            <label className="label">
+                            <label onClick={handleForgetPass} className="label">
                                 <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
                             </label>
                         </div>
@@ -57,10 +76,10 @@ const Login = () => {
                             <button className="btn btn-primary">Login</button>
                         </div>
                         {
-                            success&& <p className='text-2xl text-green-400'>User Login successfully.</p>
+                            success && <p className='text-2xl text-green-400'>User Login successfully.</p>
                         }
                         {
-                            errorMessage&& <p className='text-2xl text-red-500'>{errorMessage}</p>
+                            errorMessage && <p className='text-2xl text-red-500'>{errorMessage}</p>
                         }
                         <p className='mt-2'>new to this website? <Link to='/register'>Register</Link> </p>
                     </form>
